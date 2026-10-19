@@ -39,6 +39,19 @@ Events sent while a worker is stopped wait in Redis.
 **Shopify.** The worker queries products updated since its last run, page by page. The checkpoint keeps the
 timestamp and the page cursor, so it can resume mid-pagination. Each variant is stored as one row.
 
+## Database schema
+
+Full SQL: [docs/schema.sql](docs/schema.sql) (the same DDL the code runs in `cdms/db.py`; `t_acme` is an example tenant).
+
+- `cdms.tenants`: list of tenants.
+- `cdms.workers`: one row per worker: tenant, source, config, schedule, desired state, status, checkpoint,
+  lease owner and heartbeat.
+- `cdms.sync_runs`: one row per processed batch (counts and latency), used by `cdms stats`.
+- `cdms.rejected_records`: invalid records and the reason.
+- `master.products`: shared product catalogue, one row per GTIN-14.
+- `t_<tenant>.products`: the tenant's products from both sources, unique on `(source, source_id)`.
+  Created by `cdms tenant add`.
+
 ## Project layout
 
 ```
